@@ -1,0 +1,443 @@
+Backend API Development:
+API Routes: Create API routes for the following functionalities:
+GET /api/products: Fetch the product catalogue.
+POST /api/orders: Place a new order.
+GET /api/orders/:id: View order details (for buyers).
+GET /api/orders: View all orders (for admins).
+PUT /api/orders/:id: Update order status (for admins).
+POST /api/products: Add a new product (for admins).
+PUT /api/products/:id: Edit an existing product (for admins).
+DELETE /api/products/:id: Remove a product (for admins).
+HTTP Methods: Use appropriate HTTP methods (GET, POST, PUT, DELETE) for each API endpoint.
+Error Handling: Implement proper error handling and validation for each API route.
+
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// prisma/schema.prisma
+
+model User {
+  clerkUserId String    @id @unique
+  email       String    @unique
+  name        String?
+  role        String    @default("buyer") // Add role field with a default value of "buyer"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  orders      Order[]
+}
+
+
+model Product {
+  id     String   @id @default(uuid()) @db.Uuid
+  name   String
+  price  Float
+
+  orders Order[] @relation("OrderProducts")
+}
+
+model Order {
+  id                String     @id @default(uuid()) @db.Uuid
+  buyer_name        String
+  buyer_contact     String
+  delivery_address  String
+  items             Json
+  status            String
+  createdAt         DateTime   @default(now())
+
+  userId            String
+  user              User       @relation(fields: [userId], references: [clerkUserId])
+
+  products          Product[]  @relation("OrderProducts")
+}
+
+ive used clerk for authentication 
+
+This is api/get route
+
+import { getAuth } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export async function GET(req: Request) {
+  // Fetch the authentication details from Clerk
+  const { userId } = getAuth(req);
+
+  // Return user details
+  if (!userId) {
+    return NextResponse.json(
+      { message: "User not authenticated" },
+      { status: 401 }
+    );
+  }
+
+  const user = await prisma.user.findUnique({ where: { clerkUserId: userId } });
+
+  return NextResponse.json({ user });
+}
+
+
+api/products
+
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+
+
+export async function GET(req: Request) {
+  try {
+    const products = await prisma.product.findMany();
+    return NextResponse.json({ products });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return NextResponse.json(
+      { message: "Error fetching products" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const { name, price } = await req.json();
+
+    if (!name || !price) {
+      return NextResponse.json(
+        { message: "Missing required fields: name or price" },
+        { status: 400 }
+      );
+    }
+
+    const product = await prisma.product.create({
+      data: { name, price },
+    });
+
+    return NextResponse.json({ product });
+  } catch (error) {
+    console.error("Error adding product:", error);
+    return NextResponse.json(
+      { message: "Error adding product" },
+      { status: 500 }
+    );
+  }
+}
+
+
+api/products/[id] 
+
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { name, price, description } = await req.json();
+
+    if (!name && !price && !description) {
+      return NextResponse.json(
+        { message: "At least one field is required to update" },
+        { status: 400 }
+      );
+    }
+
+    const product = await prisma.product.update({
+      where: { id: params.id },
+      data: { name, price, description },
+    });
+
+    return NextResponse.json({ product });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return NextResponse.json(
+      { message: "Error updating product" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const user = await fetch("/api/getme").then((res) => res.json());
+
+  if (user?.role !== "admin") {
+    return NextResponse.json({ message: "Access denied" }, { status: 401 });
+  }
+  try {
+    const product = await prisma.product.delete({
+      where: { id: params.id },
+    });
+
+    return NextResponse.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    return NextResponse.json(
+      { message: "Error deleting product" },
+      { status: 500 }
+    );
+  }
+}
+
+
+api/orders
+
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export async function POST(req: Request) {
+  try {
+    const { userId, buyerName, buyerContact, deliveryAddress, items } =
+      await req.json();
+
+    if (!userId || !buyerName || !buyerContact || !deliveryAddress || !items) {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Create a new order and link it to the user and products
+    const order = await prisma.order.create({
+      data: {
+        buyer_name: buyerName,
+        buyer_contact: buyerContact,
+        delivery_address: deliveryAddress,
+        items,
+        status: "pending", // Default status for a new order
+        userId,
+        products: {
+          connect: items.map((item: { id: string }) => ({ id: item.id })), // Connect the products
+        },
+      },
+    });
+
+    return NextResponse.json({ order });
+  } catch (error) {
+    console.error("Error placing order:", error);
+    return NextResponse.json(
+      { message: "Error placing order" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    const orders = await prisma.order.findMany({
+      include: { user: true, products: true }, // Include user and product details
+    });
+
+    return NextResponse.json({ orders });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return NextResponse.json(
+      { message: "Error fetching orders" },
+      { status: 500 }
+    );
+  }
+}
+
+
+
+api/orders/[id]
+
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Await the params to ensure they are fully loaded before using them
+    const { id } = params; // Destructure and wait for params
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Fetch the order from the database using the provided order ID
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { products: true }, // Include product details
+    });
+
+    // If the order doesn't exist, return a 404 response
+    if (!order) {
+      return NextResponse.json({ message: "Order not found" }, { status: 404 });
+    }
+
+    // Return the order details
+    return NextResponse.json({ order });
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    return NextResponse.json(
+      { message: "Error fetching order" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const user = await fetch("/api/getme").then((res) => res.json());
+
+  if (user?.role !== "admin") {
+    return NextResponse.json({ message: "Access denied" }, { status: 401 });
+  }
+  try {
+    const { status } = await req.json();
+
+    if (!status) {
+      return NextResponse.json({ message: "Missing status" }, { status: 400 });
+    }
+
+    const order = await prisma.order.update({
+      where: { id: params.id },
+      data: { status },
+    });
+
+    return NextResponse.json({ order });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return NextResponse.json(
+      { message: "Error updating order status" },
+      { status: 500 }
+    );
+  }
+}
+
+
+api/webhooks/user
+
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export async function POST(req: Request) {
+  console.log("Webhook received at /api/webhooks/user");
+
+  try {
+    const body = await req.json();
+    console.log("Received webhook data:", body);
+
+    const user = body.data; // Extract the actual user object from 'data'
+    const { id, email_addresses, first_name } = user;
+    const email = email_addresses?.[0]?.email_address;
+
+    if (!id || !email) {
+      console.log("Missing required fields: id or email");
+      return NextResponse.json(
+        { message: "Missing user ID or email" },
+        { status: 400 }
+      );
+    }
+
+    const role = email === "admin@example.com" ? "admin" : "buyer"; // Auto-assign admin
+
+    console.log(
+      `Upserting user with id: ${id}, email: ${email}, name: ${first_name}`
+    );
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "Email already exists" },
+        { status: 400 }
+      );
+    }
+
+    await prisma.user.upsert({
+      where: { clerkUserId: id },
+      update: { email, name: first_name },
+      create: {
+        clerkUserId: id,
+        email,
+        name: first_name,
+        role,
+      },
+    });
+
+    console.log(`User with ID ${id} synced successfully`);
+    return NextResponse.json({ message: "User synced" });
+  } catch (error) {
+    console.error("Webhook Error:", error);
+    return NextResponse.json(
+      { message: "Error processing webhook" },
+      { status: 500 }
+    );
+  }
+}
+
+
+Now i want you to develop frontend with the following features
+
+Frontend Development:
+Product Catalogue Page: Create a page to display the product catalogue fetched from the API.
+Order Placement Form: Create a form for buyers to enter their details, select products, and specify quantities and delivery information.
+Order Tracking View: Create a page where buyers can check the status of their orders using the order ID.
+Admin Dashboard: Create a dashboard for admins to view and manage orders, and manage the product catalogue.
+API Integration: Integrate the frontend components with the backend API to fetch data and submit orders.
+State Management: Use React Context, Redux, Zustand, or similar for state management, especially for shared data like the product catalogue and user authentication status.
+Order Status Logic: Implement logic to manage and update order statuses, ensuring proper transitions between "Pending", "In Progress", and "Delivered".
+Inventory Management Logic: Implement logic to add, edit, and remove products from the catalogue.
+Styling and Design:
+
+UI Library/CSS Framework: Choose a UI library or CSS framework (e.g., Material UI, Tailwind CSS, Chakra UI, Bootstrap) to ensure a consistent and responsive design.
+Responsive Design: Implement responsive design principles to ensure the application works well on different screen sizes.
+User Experience (UX): Focus on creating an intuitive and user-friendly interface with clear navigation and feedback mechanisms.
+
+create the frontend code based on the backend code i gaver you  
+
+API Routes: Create API routes for the following functionalities:
+GET /api/products: Fetch the product catalogue.
+POST /api/orders: Place a new order.
+GET /api/orders/:id: View order details (for buyers).
+GET /api/orders: View all orders (for admins).
+PUT /api/orders/:id: Update order status (for admins).
+POST /api/products: Add a new product (for admins).
+PUT /api/products/:id: Edit an existing product (for admins).
+DELETE /api/products/:id: Remove a product (for admins).
+
+if i did anythibng wrong in admins or user logic correct that too 
+
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
+
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
+
+DATABASE_URL="postgresql://neondb_owner:npg_jOzq0fkY9UBW@ep-winter-leaf-a4u9cn48-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_d2l0dHktYW50ZWxvcGUtMjkuY2xlcmsuYWNjb3VudHMuZGV2JA
+CLERK_SECRET_KEY=sk_test_inBZHbxjtPkhXF8rPdZMsbHXXLWz9revml9iSiRuHc
+CLERK_WEBHOOK_SECRET=whsec_NINwP0x/TdGHjauaPCQael3yNQZQEaoX
+JWT_SECRET="my-secret-key"
+
+set up prisma with these credentials and db with thte tables i gave you

@@ -15,15 +15,19 @@ datasource db {
 }
 
 
+// prisma/schema.prisma
+
 model User {
-  clerkUserId String    @id @unique // Clerk's User ID is now the primary key
+  clerkUserId String    @id @unique
   email       String    @unique
   name        String?
+  role        String    @default("buyer") // Add role field with a default value of "buyer"
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   orders      Order[]
 }
+
 
 model Product {
   id     String   @id @default(uuid()) @db.Uuid

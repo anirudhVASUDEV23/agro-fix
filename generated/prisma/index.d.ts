@@ -1157,6 +1157,7 @@ export namespace Prisma {
     clerkUserId: string | null
     email: string | null
     name: string | null
+    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1165,6 +1166,7 @@ export namespace Prisma {
     clerkUserId: string | null
     email: string | null
     name: string | null
+    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1173,6 +1175,7 @@ export namespace Prisma {
     clerkUserId: number
     email: number
     name: number
+    role: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1183,6 +1186,7 @@ export namespace Prisma {
     clerkUserId?: true
     email?: true
     name?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1191,6 +1195,7 @@ export namespace Prisma {
     clerkUserId?: true
     email?: true
     name?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1199,6 +1204,7 @@ export namespace Prisma {
     clerkUserId?: true
     email?: true
     name?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1280,6 +1286,7 @@ export namespace Prisma {
     clerkUserId: string
     email: string
     name: string | null
+    role: string
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1305,6 +1312,7 @@ export namespace Prisma {
     clerkUserId?: boolean
     email?: boolean
     name?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     orders?: boolean | User$ordersArgs<ExtArgs>
@@ -1315,6 +1323,7 @@ export namespace Prisma {
     clerkUserId?: boolean
     email?: boolean
     name?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1323,6 +1332,7 @@ export namespace Prisma {
     clerkUserId?: boolean
     email?: boolean
     name?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -1331,11 +1341,12 @@ export namespace Prisma {
     clerkUserId?: boolean
     email?: boolean
     name?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"clerkUserId" | "email" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"clerkUserId" | "email" | "name" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     orders?: boolean | User$ordersArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1352,6 +1363,7 @@ export namespace Prisma {
       clerkUserId: string
       email: string
       name: string | null
+      role: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -1781,6 +1793,7 @@ export namespace Prisma {
     readonly clerkUserId: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
+    readonly role: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -4432,6 +4445,7 @@ export namespace Prisma {
     clerkUserId: 'clerkUserId',
     email: 'email',
     name: 'name',
+    role: 'role',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -4587,6 +4601,7 @@ export namespace Prisma {
     clerkUserId?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
     name?: StringNullableFilter<"User"> | string | null
+    role?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     orders?: OrderListRelationFilter
@@ -4596,6 +4611,7 @@ export namespace Prisma {
     clerkUserId?: SortOrder
     email?: SortOrder
     name?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     orders?: OrderOrderByRelationAggregateInput
@@ -4608,6 +4624,7 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringNullableFilter<"User"> | string | null
+    role?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     orders?: OrderListRelationFilter
@@ -4617,6 +4634,7 @@ export namespace Prisma {
     clerkUserId?: SortOrder
     email?: SortOrder
     name?: SortOrderInput | SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -4631,6 +4649,7 @@ export namespace Prisma {
     clerkUserId?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
+    role?: StringWithAggregatesFilter<"User"> | string
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -4759,6 +4778,7 @@ export namespace Prisma {
     clerkUserId: string
     email: string
     name?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orders?: OrderCreateNestedManyWithoutUserInput
@@ -4768,6 +4788,7 @@ export namespace Prisma {
     clerkUserId: string
     email: string
     name?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
     orders?: OrderUncheckedCreateNestedManyWithoutUserInput
@@ -4777,6 +4798,7 @@ export namespace Prisma {
     clerkUserId?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orders?: OrderUpdateManyWithoutUserNestedInput
@@ -4786,6 +4808,7 @@ export namespace Prisma {
     clerkUserId?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     orders?: OrderUncheckedUpdateManyWithoutUserNestedInput
@@ -4795,6 +4818,7 @@ export namespace Prisma {
     clerkUserId: string
     email: string
     name?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4803,6 +4827,7 @@ export namespace Prisma {
     clerkUserId?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4811,6 +4836,7 @@ export namespace Prisma {
     clerkUserId?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -5001,6 +5027,7 @@ export namespace Prisma {
     clerkUserId?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -5009,6 +5036,7 @@ export namespace Prisma {
     clerkUserId?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -5017,6 +5045,7 @@ export namespace Prisma {
     clerkUserId?: SortOrder
     email?: SortOrder
     name?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -5691,6 +5720,7 @@ export namespace Prisma {
     clerkUserId: string
     email: string
     name?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -5699,6 +5729,7 @@ export namespace Prisma {
     clerkUserId: string
     email: string
     name?: string | null
+    role?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -5740,6 +5771,7 @@ export namespace Prisma {
     clerkUserId?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -5748,6 +5780,7 @@ export namespace Prisma {
     clerkUserId?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
