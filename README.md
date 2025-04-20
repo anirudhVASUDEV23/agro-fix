@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bulk Vegetable/Fruit Order Web Application
 
-## Getting Started
+## Project Overview
 
-First, run the development server:
+This web application facilitates bulk vegetable and fruit orders where buyers can browse available products, place orders, and track their order status. Admins can manage the products and orders efficiently. The system is built using **Next.js** (with **TypeScript**), **React.js**, **Prisma ORM**, and **PostgreSQL** as the database. **Clerk** is used for user authentication (including Google OAuth).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### For Buyers:
+- Browse the product catalog (vegetables and fruits).
+- Place bulk orders by selecting products and providing required details (e.g., delivery address).
+- Track the status of orders using the order ID.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### For Admins:
+- Manage the product catalog (add, edit, or delete products).
+- View and manage all orders.
+- Update the order status (e.g., "Pending", "In Progress", "Delivered").
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Authentication:
+- Users can sign in or sign up using **Google** via **Clerk** authentication.
+- Admins can log in using pre-configured credentials for admin management.
+  
+### Admin Role Credentials
 
-## Learn More
+To access the **admin dashboard**, use the following credentials:
+- **Email**: admin@example.com
+- **Password**: agro-fix-admin
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Frontend**: Next.js,TypeScript
+- **Backend**: Next.js API routes, PostgreSQL, Prisma ORM
+- **Authentication**: Clerk (Google OAuth via Clerk Webhooks)
+- **Database**: PostgreSQL (hosted on Neon.tech)
+- **Styling**: Shaccn UI,Tailwind v4,framer motion
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+### Clerk Authentication (Google OAuth)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+For users who want to sign up or sign in:
+- Use **Google** login via **Clerk**.
+- Clerk webhooks are used to handle authentication and ensure secure user management.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Database Schema
+
+- **User Model**:
+    - `clerkUserId`: Unique identifier for the user (from Clerk).
+    - `email`: User's email (unique).
+    - `name`: User's name.
+    - `role`: The user's role (either "buyer" or "admin").
+    - `orders`: Relation to orders placed by the user.
+
+- **Product Model**:
+    - `id`: Unique identifier for the product.
+    - `name`: Name of the product (e.g., "Apple", "Carrot").
+    - `price`: Price of the product.
+    - `orders`: Relation to orders that contain the product.
+
+- **Order Model**:
+    - `id`: Unique identifier for the order.
+    - `buyer_name`: Name of the buyer.
+    - `buyer_contact`: Contact information for the buyer.
+    - `delivery_address`: Address for delivery.
+    - `items`: List of items in the order (serialized as JSON).
+    - `status`: The current status of the order (e.g., "Pending", "In Progress", "Delivered").
+    - `userId`: Reference to the user who placed the order.
+    - `user`: Relation to the `User` model.
+    - `products`: Relation to the `Product` model for the products in the order.
+
+### API Endpoints
+
+- `GET /api/products`: Fetch the product catalog.
+- `POST /api/orders`: Place a new order.
+- `GET /api/orders/:id`: Get order details (buyer view).
+- `GET /api/orders`: View all orders (admin view).
+- `PUT /api/orders/:id`: Update order status (admin).
+- `POST /api/products`: Add a new product (admin).
+- `PUT /api/products/:id`: Edit a product (admin).
+- `DELETE /api/products/:id`: Delete a product (admin).
+
+### Deployment
+
+- **Vercel Deployment**:
+    - Create an account on [Vercel](https://vercel.com/).
+    - Connect your GitHub repository to Vercel.
+    - Configure environment variables (same as `.env`).
+    - Deploy the app on Vercel.
+
+- The live application can be accessed at:  
+  **[Vercel Deployment URL](https://agro-fix-keet.vercel.app)**.
+
