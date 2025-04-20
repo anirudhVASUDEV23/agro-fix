@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from '@/lib/prisma';
 
+// PUT route to update an order status
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } } // Ensure correct typing for params
 ) {
   try {
     const user = await currentUser(); // Await the promise
@@ -17,7 +18,7 @@ export async function PUT(
 
     const order = await prisma.order.update({
       where: {
-        id: params.id,
+        id: params.id, // Using the dynamic 'id' from the URL
       },
       data: {
         status,
@@ -34,9 +35,10 @@ export async function PUT(
   }
 }
 
+// GET route to fetch order details
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } } // Ensure correct typing for params
 ) {
   try {
     const user = await currentUser(); // Await the promise
@@ -46,10 +48,10 @@ export async function GET(
 
     const order = await prisma.order.findUnique({
       where: {
-        id: params.id,
+        id: params.id, // Using the dynamic 'id' from the URL
       },
       include: {
-        items: true,
+        items: true, // Include related items if applicable
       },
     });
 
