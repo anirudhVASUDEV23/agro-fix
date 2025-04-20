@@ -16,7 +16,7 @@ interface OrderDetails {
   buyer_name: string;
   buyer_contact: string;
   delivery_address: string;
-  items: any;
+  items: Record<string, number>;
   status: string;
   createdAt: string;
 }
@@ -41,7 +41,6 @@ export default function TrackOrderPage() {
       setOrder(null);
 
       const response = await fetch(`/api/orders/${data.orderId}`);
-
       const result = await response.json();
 
       if (!response.ok) {
@@ -125,9 +124,9 @@ export default function TrackOrderPage() {
 
               <div>
                 <span
-                  className={\`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium \${getStatusColor(
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
                     order.status
-                  )}\`}
+                  )}`}
                 >
                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                 </span>
