@@ -19,65 +19,21 @@ This web application facilitates bulk vegetable and fruit orders where buyers ca
 ### Authentication:
 - Users can sign in or sign up using **Google** via **Clerk** authentication.
 - Admins can log in using pre-configured credentials for admin management.
-
-## Tech Stack
-
-- **Frontend**: Next.js, React.js, TypeScript, Chakra UI, Axios
-- **Backend**: Next.js API routes, PostgreSQL, Prisma ORM
-- **Authentication**: Clerk (Google OAuth via Clerk Webhooks)
-- **Database**: PostgreSQL (hosted on Neon.tech or via Docker)
-- **Styling**: Chakra UI, Tailwind CSS (Optional)
-
-## Setup Instructions
-
-### Prerequisites
-
-- **Node.js** and **npm/yarn** installed.
-- **PostgreSQL** database setup (using **Neon.tech** or **Docker**).
-- **Clerk** account for authentication.
-
-### Installation
-
-1. **Clone the repository**:
-    ```bash
-    git clone <repository-url>
-    cd <project-directory>
-    ```
-
-2. **Install dependencies**:
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-
-3. **Database Setup**:
-    - If using **Neon.tech**: Create a database on [Neon.tech](https://neon.tech/), and update the database credentials in `.env`.
-    - If using **Docker**: Set up a PostgreSQL container and update the `.env` file with the connection details.
-
-4. **Set up environment variables**:
-    - Create a `.env` file in the root of the project with the following values:
-    ```env
-    DATABASE_URL=your-database-connection-string
-    CLERK_FRONTEND_API=your-clerk-frontend-api-key
-    CLERK_API_KEY=your-clerk-api-key
-    NEXT_PUBLIC_API_URL=http://localhost:3000/api
-    ```
-
-5. **Run the application**:
-    - For development:
-    ```bash
-    npm run dev
-    # or
-    yarn dev
-    ```
-    - The app will be available at `http://localhost:3000`.
-
+  
 ### Admin Role Credentials
 
 To access the **admin dashboard**, use the following credentials:
 - **Email**: admin@example.com
 - **Password**: agro-fix-admin
+
+## Tech Stack
+
+- **Frontend**: Next.js,TypeScript
+- **Backend**: Next.js API routes, PostgreSQL, Prisma ORM
+- **Authentication**: Clerk (Google OAuth via Clerk Webhooks)
+- **Database**: PostgreSQL (hosted on Neon.tech)
+- **Styling**: Shaccn UI,Tailwind v4,framer motion
+
 
 ### Clerk Authentication (Google OAuth)
 
@@ -131,19 +87,5 @@ For users who want to sign up or sign in:
     - Deploy the app on Vercel.
 
 - The live application can be accessed at:  
-  **[Vercel Deployment URL](your-vercel-deployment-url)**.
+  **[Vercel Deployment URL](https://agro-fix-keet.vercel.app)**.
 
-## Contributing
-
-Feel free to fork this project and contribute by submitting issues or pull requests. Please ensure you follow the code style and add comments where necessary for clarity.
-
-## License
-
-This project is licensed under the MIT License.
-
----
-
-### Additional Notes
-
-- **Google Authentication via Clerk**: If you are integrating Google sign-in, make sure to configure the **Clerk API keys** and **Frontend API key** in the `.env` file. Clerk webhooks will handle the authentication and ensure secure user management.
-- **Product and Order Management**: Admins can view, add, and manage products, and update the status of orders to reflect the processing stages of bulk orders.
