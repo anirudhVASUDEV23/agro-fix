@@ -1,21 +1,21 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { Package, Calendar, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
-export default function OrderDetails({ params }: { params: { id: string } }) {
+export default function OrderDetails() {
+  const params = useParams();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useUser();
-  const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      router.push('/sign-in');
-      return;
-    }
-
-    fetch(`/api/orders/${params.id}`)
+    const orderId = Array.isArray(params.id) ? params.id[0] : params.id;
+    
+    fetch(`/api/orders/${orderId}`)
       .then(res => res.json())
       .then(data => {
         setOrder(data.order);
@@ -25,45 +25,94 @@ export default function OrderDetails({ params }: { params: { id: string } }) {
         console.error('Error fetching order:', error);
         setLoading(false);
       });
-  }, [params.id, user]);
+  }, [params.id]);
 
-  if (loading) return <div>Loading...</div>;
-  if (!order) return <div>Order not found</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity }}
+        >
+          <Package className="w-8 h-8 text-blue-500" />
+        </motion.div>
+      </div>
+    );
+  }
 
-  return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Order Details</h1>
-      <div className="border rounded-lg p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h2 className="font-semibold">Order Status</h2>
-            <p className="text-lg">{order.status}</p>
-          </div>
-          <div>
-            <h2 className="font-semibold">Order Date</h2>
-            <p className="text-lg">{new Date(order.createdAt).toLocaleDateString()}</p>
-          </div>
-          <div>
-            <h2 className="font-semibold">Delivery Address</h2>
-            <p className="text-lg">{order.delivery_address}</p>
-          </div>
-          <div>
-            <h2 className="font-semibold">Contact</h2>
-            <p className="text-lg">{order.buyer_contact}</p>
-          </div>
-        </div>
-        <div className="mt-6">
-          <h2 className="font-semibold mb-4">Order Items</h2>
-          <div className="space-y-2">
-            {order.products.map((product: any) => (
-              <div key={product.id} className="flex justify-between items-center">
-                <span>{product.name}</span>
-                <span>${product.price}</span>
-              </div>
-            ))}
-          </div>
+  if (!order) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-700">Order not found</h2>
+          <Link 
+            href="/orders"
+            className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-700"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Orders
+          </Link>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <Link 
+        href="/orders"
+        className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-6"
+      >
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back to Orders
+      </Link>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Order #{order.id}</span>
+            <Badge variant={
+              order.status === 'delivered' ? 'success' :
+              order.status === 'pending' ? 'warning' : 'secondary'
+            }>
+              {order.status}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div>
+            <h3 className="font-semibold mb-2">Delivery Details</h3>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p>Name: {order.buyer_name}</p>
+              <p>Contact: {order.buyer_contact}</p>
+              <p>Address: {order.delivery_address}</p>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2">Order Items</h3>
+            <div className="space-y-2">
+              {order.items.map((item: any, index: number) => (
+                <div key={index} className="flex justify-between py-2 border-b">
+                  <span>{item.name} x {item.quantity}</span>
+                  <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-4 font-bold">
+            <span>Total</span>
+            <span>${order.items.reduce((sum: number, item: any) => 
+              sum + (item.price * item.quantity), 0).toFixed(2)}</span>
+          </div>
+
+          <div className="text-sm text-gray-600 flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            {new Date(order.createdAt).toLocaleDateString()}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

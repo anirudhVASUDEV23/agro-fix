@@ -1,21 +1,5 @@
 import { create } from 'zustand';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-}
-
-interface Order {
-  id: string;
-  buyer_name: string;
-  buyer_contact: string;
-  delivery_address: string;
-  items: any;
-  status: string;
-  createdAt: Date;
-  userId: string;
-}
+import { persist } from 'zustand/middleware';
 
 interface CartItem {
   productId: string;
@@ -23,29 +7,47 @@ interface CartItem {
 }
 
 interface StoreState {
-  products: Product[];
-  orders: Order[];
-  setProducts: (products: Product[]) => void;
-  setOrders: (orders: Order[]) => void;
   cart: CartItem[];
   addToCart: (productId: string) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
+  updateQuantity: (productId: string, quantity: number) => void;
 }
 
-export const useStore = create<StoreState>((set) => ({
-  products: [],
-  orders: [],
-  setProducts: (products) => set({ products }),
-  setOrders: (orders) => set({ orders }),
-  cart: [],
-  addToCart: (productId) => 
-    set((state) => ({
-      cart: [...state.cart, { productId, quantity: 1 }]
-    })),
-  removeFromCart: (productId) =>
-    set((state) => ({
-      cart: state.cart.filter(item => item.productId !== productId)
-    })),
-  clearCart: () => set({ cart: [] })
-}));
+export const useStore = create<StoreState>()(
+  persist(
+    (set) => ({
+      cart: [],
+      addToCart: (productId) =>
+        set((state) => {
+          const existingItem = state.cart.find(item => item.productId === productId);
+          if (existingItem) {
+            return {
+              cart: state.cart.map(item =>
+                item.productId === productId
+                  ? { ...item, quantity: item.quantity + 1 }
+                  : item
+              ),
+            };
+          }
+          return { cart: [...state.cart, { productId, quantity: 1 }] };
+        }),
+      removeFromCart: (productId) =>
+        set((state) => ({
+          cart: state.cart.filter(item => item.productId !== productId),
+        })),
+      clearCart: () => set({ cart: [] }),
+      updateQuantity: (productId, quantity) =>
+        set((state) => ({
+          cart: state.cart.map(item =>
+            item.productId === productId
+              ? { ...item, quantity }
+              : item
+          ),
+        })),
+    }),
+    {
+      name: 'cart-storage',
+    }
+  )
+);

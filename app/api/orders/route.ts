@@ -1,38 +1,45 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { currentUser } from "@clerk/nextjs/server";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const { userId, buyerName, buyerContact, deliveryAddress, items } =
-      await req.json();
-
-    if (!userId || !buyerName || !buyerContact || !deliveryAddress || !items) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      );
+    const user = await currentUser();
+    if (!user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Create a new order and link it to the user and products
+    const body = await request.json();
+    const { 
+      buyer_name, 
+      buyer_contact, 
+      delivery_address, 
+      items,
+      productIds 
+    } = body;
+
     const order = await prisma.order.create({
       data: {
-        buyer_name: buyerName,
-        buyer_contact: buyerContact,
-        delivery_address: deliveryAddress,
+        buyer_name,
+        buyer_contact,
+        delivery_address,
         items,
-        status: "pending", // Default status for a new order
-        userId,
+        status: 'pending',
+        userId: user.id,
         products: {
-          connect: items.map((item: { id: string }) => ({ id: item.id })), // Connect the products
-        },
+          connect: productIds.map((id: string) => ({ id }))
+        }
       },
+      include: {
+        products: true
+      }
     });
 
     return NextResponse.json({ order });
   } catch (error) {
-    console.error("Error placing order:", error);
+    console.error('Error creating order:', error);
     return NextResponse.json(
-      { message: "Error placing order" },
+      { message: 'Error creating order' },
       { status: 500 }
     );
   }
