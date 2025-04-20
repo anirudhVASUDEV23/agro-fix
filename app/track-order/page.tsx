@@ -40,7 +40,8 @@ export default function TrackOrderPage() {
       setError("");
       setOrder(null);
 
-      const response = await fetch(\`/api/orders/\${data.orderId}\`);
+      const response = await fetch(`/api/orders/${data.orderId}`);
+
       const result = await response.json();
 
       if (!response.ok) {
